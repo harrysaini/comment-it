@@ -1,52 +1,189 @@
-import React from 'react';
+import React, { BaseSyntheticEvent } from 'react';
 import Replies from './Replies';
+import InputBox from './InputBox';
+import CommentService from '../../../services/comment.service';
+import { AuthService } from '../../../services/auth.service';
 
 interface Props {
   comment: any;
+  setComments: (obj: any, cb: any) => void
+}
+interface State {
+  isEditable: boolean;
+  editButtonText: string;
+  showReplies: boolean;
+  showReplyInput: boolean;
 }
 
-const SingleComment: React.FunctionComponent<Props> = (props: Props) => {
+class SingleComment extends React.Component<Props, State> {
 
-  const comment = props.comment;
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      isEditable: false,
+      editButtonText: 'Edit',
+      showReplies: false,
+      showReplyInput: false
+    }
+  }
 
-  return (
-    <div className="comment">
-      <div className="d-flex ">
-        <div>
-          <img
-            height="50px"
-            width="50px"
-            className="img-fluid"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQk4Lw8zSVdKxa7mRd_hZfY8mx1-ieO6P9m4nHMq63b77e2iecU"
-          />
-        </div>
-        <div className="comment-data">
-          <div className="comment-info">
-            <div className="user-name">
-              {comment.user.username}
-            </div>
-            <div className="date">
-              {comment.createdAt}
-            </div>
+
+
+  editComment = async (val: string) => {
+    try{
+      const updatedComment = await CommentService.editComment(this.props.comment.id, val);
+
+      this.setState({
+        isEditable: false,
+        editButtonText: 'Edit'
+      });
+
+      this.props.setComments(this.props.comment, (comment: any) => {
+        comment.text = updatedComment.text;
+      });
+
+    } catch(e) {
+      alert(e);
+      throw e;
+    }
+  }
+
+  replyComment = async (val: string) => {
+    try{
+      const reply = await CommentService.postComment({
+        text: val,
+        userId: AuthService.user.id,
+        replyTo: this.props.comment.id
+      });
+
+      this.props.setComments(this.props.comment, (comment: any) => {
+        comment.replies.push(reply);
+      });
+      this.setState({
+        showReplyInput: false
+      });
+      return;
+
+    } catch(e) {
+      alert(e);
+      throw e;
+    }
+  }
+
+  onEditCommentClick = () => {
+    if(!this.state.isEditable) {
+      this.setState({
+        isEditable: true,
+        editButtonText: 'Cancel'
+      });
+    } else {
+      this.setState({
+        isEditable: false,
+        editButtonText: 'Edit'
+      });
+    }
+
+  }
+
+  render() {
+
+    const comment = this.props.comment;
+
+    return (
+      <div className="comment">
+        <div className="d-flex ">
+          <div>
+            <img
+              height="50px"
+              width="50px"
+              className="img-fluid"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQk4Lw8zSVdKxa7mRd_hZfY8mx1-ieO6P9m4nHMq63b77e2iecU"
+            />
           </div>
-          <div className="comment-text">
-            {comment.text}
-          </div>
-          <div className="comment-actions">
-            <div className="edit link-btn">
-              Edit
+          <div className="comment-data">
+            <div className="comment-info">
+              <div className="user-name">
+                {comment.user.username}
+              </div>
+              <div className="date">
+                {comment.createdAt}
+              </div>
             </div>
-            <div className="reply link-btn">
-              Reply
+
+            <div className="comment-text">
+              {
+                !this.state.isEditable ?
+                (
+                  <div>{this.props.comment.text}</div>
+                ) : (
+                  <InputBox
+                    rows={1}
+                    value={this.props.comment.text}
+                    task={this.editComment}
+                  />
+                )
+              }
             </div>
+
+            <div className="comment-actions">
+              <div
+                className="edit link-btn"
+                onClick={this.onEditCommentClick}>
+                {this.state.editButtonText}
+              </div>
+              <div
+                className="reply link-btn"
+                onClick={() => {
+                  this.setState({
+                    showReplies: true,
+                    showReplyInput: !this.state.showReplyInput
+                  })
+                }}
+              >
+                Reply
+              </div>
+              { comment.replies && comment.replies.length > 0 &&
+              (
+                <div
+                  className="replies link-btn"
+                  onClick={() => {
+                    this.setState({
+                      showReplies: !this.state.showReplies
+                    })
+                  }}>
+                {this.state.showReplies ? 'Hide' : comment.replies.length} Replies
+                </div>
+              )
+              }
+
+            </div>
+            <hr />
+            { this.state.showReplies &&
+              <div className="replies col-offset-1">
+                { this.state.showReplyInput &&
+                  (
+                    <div className="p-2">
+                      <InputBox
+                        rows={1}
+                        task={this.replyComment}
+                      />
+                      <hr/>
+                    </div>
+                  )
+                }
+                <Replies
+                  replies={comment.replies}
+                  showReplyInput={this.state.showReplyInput}
+                  setComments={this.props.setComments}
+                />
+              </div>
+            }
           </div>
-          <hr/>
-          <Replies replies={comment.replies}/>
         </div>
       </div>
-    </div>
 
-  );
+    );
+  }
 
 }
 

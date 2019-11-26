@@ -33,7 +33,6 @@ class CommentService {
       const comments =  response.data;
       return comments;
     } catch (e) {
-      alert(e.message);
       throw e;
     }
   }
@@ -53,9 +52,31 @@ class CommentService {
 
       const comment =  response.data;
       comment.user = AuthService.user;
+      comment.replies = [];
       return comment;
     } catch (e) {
-      alert(e.message);
+      throw e;
+    }
+  }
+
+  static async editComment(id: number, text: string): Promise<any> {
+    try {
+      const resp = await fetch(`${postCommentUrl}/${id}`, {
+        method: 'put',
+        headers: headers,
+        body: JSON.stringify({
+          text
+        })
+      });
+
+      const response = await resp.json();
+      if (response.status.code !== 0) {
+        throw new Error(response.status.message);
+      }
+
+      const comment =  response.data;
+      return comment;
+    } catch (e) {
       throw e;
     }
   }

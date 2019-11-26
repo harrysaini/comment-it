@@ -5,6 +5,8 @@ import { reverseMap } from '../../../utils/reverseMap';
 
 interface Props {
   replies: any[];
+  showReplyInput: boolean;
+  setComments: (val: any, cb: any) => void;
 }
 
 const Replies: React.FunctionComponent<Props> = (props: Props) => {
@@ -12,11 +14,11 @@ const Replies: React.FunctionComponent<Props> = (props: Props) => {
   const replies = props.replies;
 
   const repliesJSX = reverseMap(replies, (reply, index) => {
-    return <SingleComment comment={reply} key={index}/>
+    return <SingleComment comment={reply} key={index} setComments={props.setComments}/>
   })
 
   return (
-    <div className="replies col-offset-1">
+    <div>
       {repliesJSX}
     </div>
   );

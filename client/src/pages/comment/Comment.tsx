@@ -11,8 +11,6 @@ import { reverseMap } from '../../utils/reverseMap';
 interface State {
   comments: any[],
   isLoaded: boolean;
-  newComment: string;
-  submitButtonDisabled: boolean;
 }
 
 interface Props {
@@ -24,9 +22,7 @@ class Comments extends React.Component<Props, State> {
     super(props);
     this.state = {
       comments: [],
-      isLoaded: false,
-      newComment: '',
-      submitButtonDisabled: false
+      isLoaded: false
     }
 
   }
@@ -43,41 +39,29 @@ class Comments extends React.Component<Props, State> {
     }
   }
 
-  handleChange = (event: BaseSyntheticEvent) => {
-    this.setState({
-      newComment: event.target.value
-    });
-  }
-
-  onSubmitInputClick = async () => {
-    if(this.state.newComment === '') {
-      return;
-    }
-    this.setState({
-      submitButtonDisabled: true
-    });
-
+  postComment = async (commentString: string) => {
     try{
       const comment = await CommentService.postComment({
-        text: this.state.newComment,
+        text: commentString,
         userId: AuthService.user.id
       });
 
       this.setState({
-        newComment: '',
         comments: this.state.comments.concat([comment]),
-        submitButtonDisabled: false
       });
 
     } catch(e) {
       alert(e);
-      this.setState({
-        submitButtonDisabled: false
-      });
+      throw e;
     }
   }
 
-
+  setComments = (comment: any, cb: any) => {
+    cb(comment);
+    this.setState({
+      comments: this.state.comments
+    });
+  }
 
   render() {
 
@@ -86,7 +70,7 @@ class Comments extends React.Component<Props, State> {
     }
 
     const comments = reverseMap(this.state.comments, (comment, index) => {
-      return <SingleComment comment={comment} key={index} />
+      return <SingleComment comment={comment} key={index} setComments={this.setComments}/>
     })
 
     return (
@@ -94,10 +78,7 @@ class Comments extends React.Component<Props, State> {
         <div>
           <InputBox
             rows={3}
-            onChange={this.handleChange}
-            onSubmitClick={this.onSubmitInputClick}
-            value= {this.state.newComment}
-            btnDisable={this.state.submitButtonDisabled}
+            task={this.postComment}
           />
         </div>
         <div className='comments'>
