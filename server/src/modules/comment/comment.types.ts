@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import _ from 'lodash';
-import User from 'src/models/user.model';
+import User from '../../models/user.model';
 
 
 export interface IAddCommentRequestOptions {
