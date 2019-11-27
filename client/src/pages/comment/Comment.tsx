@@ -58,9 +58,7 @@ class Comments extends React.Component<Props, State> {
 
   setComments = (comment: any, cb: any) => {
     cb(comment);
-    this.setState({
-      comments: this.state.comments
-    });
+    this.forceUpdate();
   }
 
   render() {
