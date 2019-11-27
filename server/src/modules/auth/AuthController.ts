@@ -5,7 +5,7 @@ import { GenericResponse, IGenericResponse } from '../../utils/GenericResponse';
 import AuthModel from './AuthModel';
 import User from '../../models/user.model';
 
-class GameController {
+class AuthController {
 
   static async signUp(req: Request, res: Response) {
     try {
@@ -43,4 +43,4 @@ class GameController {
   }
 }
 
-export default GameController;
+export default AuthController;
