@@ -4,9 +4,12 @@ import { extend } from 'lodash';
 
 export interface IConfig{
   apiUrl: string;
+  STOP_RECURSION_LEVEL: number;
 }
 
-let defaultConfig = {};
+let defaultConfig = {
+  STOP_RECURSION_LEVEL: 5
+};
 let envConfig;
 
 if(process.env.NODE_ENV === 'production') {

@@ -16,8 +16,8 @@ apiRouter.post('/v1/auth/login', AuthController.login);
 apiRouter.get('/v1/auth/me', passport.authenticate('jwt', {session: false}),  AuthController.getUser);
 
 
-apiRouter.post('/v1/comment', CommentController.addComment);
-apiRouter.put('/v1/comment/:id', CommentController.editComment);
-apiRouter.get('/v1/comments', CommentController.getComments);
+apiRouter.post('/v1/comment', passport.authenticate('jwt', {session: false}), CommentController.addComment);
+apiRouter.put('/v1/comment/:id', passport.authenticate('jwt', {session: false}), CommentController.editComment);
+apiRouter.get('/v1/comments', passport.authenticate('jwt', {session: false}), CommentController.getComments);
 
 export default apiRouter;

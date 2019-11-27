@@ -6,8 +6,7 @@ const getCommentsUrl = config.apiUrl + '/api/v1/comments';
 const postCommentUrl = config.apiUrl + '/api/v1/comment';
 
 const headers = {
-  //...AuthService.getAuthHeaders(),
-
+  ...AuthService.getAuthHeaders(),
   "Content-type": "application/json"
 }
 
@@ -23,6 +22,7 @@ class CommentService {
     try {
       const resp = await fetch(getCommentsUrl, {
         method: 'get',
+        headers: AuthService.getAuthHeaders()
       });
 
       const response = await resp.json();

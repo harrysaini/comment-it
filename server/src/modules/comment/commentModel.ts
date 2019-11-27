@@ -4,6 +4,7 @@ import { areArrayEqual } from '../../utils/helpers';
 import CommentDAO from '../../dao/comment.dao';
 import { IAddCommentRequestOptions, IEditCommentRequestOptions } from "./comment.types";
 
+const STOP_RECURSION_LEVEL = 5;
 
 class CommentModel {
 
@@ -13,6 +14,9 @@ class CommentModel {
       const replyingToComment = await CommentDAO.findCommentByID(options.replyTo);
       if(_.isUndefined(replyingToComment) || replyingToComment === null) {
         throw new Error('replyId not found');
+      }
+      if(replyingToComment.level >= STOP_RECURSION_LEVEL) {
+        throw new Error('reply can not be added at this level');
       }
       level = replyingToComment.level + 1;
     }
@@ -38,6 +42,10 @@ class CommentModel {
 
     if(comment === null || _.isUndefined(comment)) {
       throw new Error('commentId not found');
+    }
+
+    if(options.userId !== comment.userId) {
+      throw new Error('user not allowed to edit');
     }
 
     return await comment.update({

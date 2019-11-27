@@ -5,6 +5,7 @@ interface Props {
   rows: number,
   value?: string;
   task: (val: string) => Promise<any>;
+  onTaskDone?: () => void
 }
 interface State {
   inputValue: string;
@@ -43,6 +44,8 @@ class InputBox extends React.Component<Props, State>  {
         inputValue: '',
         submitButtonDisabled: false
       });
+      this.props.onTaskDone && this.props.onTaskDone();
+
     } catch(e) {
       this.setState({
         submitButtonDisabled: false
